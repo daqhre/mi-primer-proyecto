@@ -1,0 +1,154 @@
+﻿.auth-page {
+  min-height: calc(100vh - 2rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+  padding: 2rem;
+  background: var(--surface);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+}
+
+h2 {
+  margin: 0 0 1.5rem;
+  text-align: center;
+  font-size: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.65rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+input,
+select {
+  border: 1px solid rgba(47, 128, 237, 0.2);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.phone-prefix {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  background: #f3f6fb;
+  border: 1px solid rgba(47, 128, 237, 0.18);
+  color: var(--muted);
+}
+
+.phone-group input {
+  border-radius: 16px;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.btn-toggle-password {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.password-requirements {
+  background: #f8fafc;
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(47, 128, 237, 0.12);
+  margin-bottom: 1rem;
+}
+
+.requirements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0 0;
+}
+
+.requirements-list li {
+  color: var(--muted);
+  margin-bottom: 0.45rem;
+}
+
+.requirements-list li.met {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.strength-bar {
+  flex: 1;
+  height: 10px;
+  background: #e9eff8;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.strength-text {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.select-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.error-password {
+  color: var(--danger);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.message {
+  margin-top: 1rem;
+  min-height: 1.2rem;
+  text-align: center;
+  color: var(--danger);
+}

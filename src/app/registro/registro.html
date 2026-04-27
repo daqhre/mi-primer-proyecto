@@ -1,0 +1,80 @@
+<div class="auth-page">
+  <div class="auth-card card">
+    <h2>Crear cuenta</h2>
+
+    <form (ngSubmit)="registrar()">
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" placeholder="Nombre" [(ngModel)]="usuario.nombre" name="nombre" required>
+      </div>
+      <div class="form-group">
+        <label>Apellido</label>
+        <input type="text" placeholder="Apellido" [(ngModel)]="usuario.apellido" name="apellido" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="Email" [(ngModel)]="usuario.email" name="email" required>
+      </div>
+
+      <div class="input-group phone-group">
+        <span class="phone-prefix">+57</span>
+        <input type="tel" placeholder="Número de Teléfono" [(ngModel)]="usuario.telefono" name="telefono" required>
+      </div>
+
+      <div class="password-wrapper">
+        <input [type]="mostrarPassword ? 'text' : 'password'" placeholder="Contraseña" [(ngModel)]="usuario.password" name="password" required (input)="onPasswordChange()">
+        <button type="button" class="btn btn-icon btn-toggle-password" (click)="togglePasswordVisibility()">
+          {{ mostrarPassword ? '🙈' : '👁️' }}
+        </button>
+      </div>
+
+      <div class="password-requirements" *ngIf="usuario.password.length > 0">
+        <p class="requirements-title">La contraseña debe contener:</p>
+        <ul class="requirements-list">
+          <li [class.met]="usuario.password.length >= 8">✓ Al menos 8 caracteres</li>
+          <li [class.met]="/[A-Z]/.test(usuario.password)">✓ Una letra mayúscula</li>
+          <li [class.met]="/[a-z]/.test(usuario.password)">✓ Una letra minúscula</li>
+          <li [class.met]="/\d/.test(usuario.password)">✓ Un número</li>
+          <li [class.met]="/[!@#$%^&*()_+\-=\[\]{};':&quot;\\|,.>\/?]/.test(usuario.password)">✓ Un carácter especial (!@#$%^&*...)</li>
+        </ul>
+      </div>
+
+      <div class="form-group">
+        <label>Fecha de Nacimiento</label>
+      </div>
+
+      <div class="select-row">
+        <div class="select-group">
+          <select [(ngModel)]="diaSeleccionado" name="dia" (change)="actualizarFecha()" required>
+            <option [ngValue]="null" disabled selected>Día</option>
+            <option *ngFor="let d of dias" [ngValue]="d">{{d}}</option>
+          </select>
+          <select [(ngModel)]="mesSeleccionado" name="mes" (change)="actualizarFecha()" required>
+            <option value="" disabled selected>Mes</option>
+            <option *ngFor="let m of meses" [value]="m">{{m}}</option>
+          </select>
+          <select [(ngModel)]="anioSeleccionado" name="anio" (change)="actualizarFecha()" required>
+            <option [ngValue]="null" disabled selected>Año</option>
+            <option *ngFor="let a of anios" [ngValue]="a">{{a}}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Género</label>
+        <select [(ngModel)]="usuario.genero" name="genero" required>
+          <option value="">Selecciona género</option>
+          <option value="masculino">Masculino</option>
+          <option value="femenino">Femenino</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Registrar</button>
+    </form>
+
+    <button type="button" class="btn btn-secondary btn-block" (click)="irALogin()">Volver al login</button>
+
+    <p class="message">{{ mensaje }}</p>
+  </div>
+</div>

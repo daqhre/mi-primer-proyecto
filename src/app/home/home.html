@@ -1,0 +1,334 @@
+<div class="home-shell">
+  <aside class="sidebar">
+    <div class="brand-info">
+      <img src="imagen1.png" alt="PaisaGas" class="logo-sidebar">
+      <div>
+        <p class="brand-label">PaisaGas</p>
+        <p class="brand-subtitle">Gas para tu hogar</p>
+      </div>
+    </div>
+    
+    <nav class="nav-menu">
+      <button class="nav-item" [class.active]="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup" (click)="toggleVista('productos')">
+        Catálogo de Productos
+      </button>
+      <button class="nav-item" [class.active]="verSeccionFacturas" (click)="toggleVista('factura')">
+        Mis Facturas
+      </button>
+      <button class="nav-item" [class.active]="verSeccionNormas" (click)="toggleVista('normas')">
+        Normas ISO
+      </button>
+      <button class="nav-item" [class.active]="verSeccionQuejas" (click)="toggleVista('quejas')">
+        Quejas y Reclamos
+      </button>
+      <button class="nav-item" [class.active]="verSeccionCertificados" (click)="toggleVista('certificados')">
+        Certificados
+      </button>
+      <button class="nav-item" [class.active]="verSeccionPolitica" (click)="toggleVista('politica')">
+        Política de Seguridad
+      </button>
+      <button class="nav-item" [class.active]="verSeccionBackup" (click)="toggleVista('backup')">
+        Copia de Seguridad
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn btn-secondary btn-block" (click)="logout()">Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <main class="content-area">
+    <section class="top-header">
+      <div class="profile-pill">
+        <div class="profile-img" [style.background-image]="fotoPerfil ? 'url(' + fotoPerfil + ')' : 'none'">
+        </div>
+        <div class="user-meta">
+          <h2>{{ usuario.nombre }} {{ usuario.apellido }}</h2>
+          <p>{{ usuario.email }}</p>
+        </div>
+        <label for="foto-input" class="btn btn-outline btn-sm">Editar</label>
+        <input id="foto-input" type="file" accept="image/*" (change)="onFotoSeleccionada($event)" hidden>
+      </div>
+    </section>
+
+    <section class="page-section">
+      <header class="page-header">
+        <h1 class="section-title" *ngIf="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup">Catálogo de Productos</h1>
+        <h1 class="section-title" *ngIf="verSeccionFacturas">Mis Facturas</h1>
+        <h1 class="section-title" *ngIf="verSeccionNormas">Normas ISO Certificadas</h1>
+        <h1 class="section-title" *ngIf="verSeccionQuejas">Quejas, Reclamos y Felicitaciones</h1>
+        <h1 class="section-title" *ngIf="verSeccionCertificados">Certificados de Salud y Trabajo</h1>
+        <h1 class="section-title" *ngIf="verSeccionPolitica">Política de Seguridad de Información</h1>
+        <h1 class="section-title" *ngIf="verSeccionBackup">Copia de Seguridad</h1>
+        <p class="section-desc" *ngIf="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup">Selecciona la pipeta que necesites para tu hogar o negocio.</p>
+        <p class="section-desc" *ngIf="verSeccionFacturas">Aquí encontrarás el registro de todas tus compras exitosas.</p>
+        <p class="section-desc" *ngIf="verSeccionNormas">PaisaGas cumple con las siguientes normas internacionales de calidad y seguridad.</p>
+        <p class="section-desc" *ngIf="verSeccionQuejas">Envíanos tus comentarios, quejas o felicitaciones. Tu opinión es importante para nosotros.</p>
+        <p class="section-desc" *ngIf="verSeccionCertificados">Sube tus certificados de salud y trabajo para mantener tu perfil actualizado.</p>
+        <p class="section-desc" *ngIf="verSeccionPolitica">Conoce nuestras políticas de seguridad y protección de datos.</p>
+        <p class="section-desc" *ngIf="verSeccionBackup">Solicita una copia de seguridad de tus datos personales.</p>
+      </header>
+
+      <section *ngIf="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup" class="products-section">
+        <div class="productos-grid">
+          <div *ngFor="let producto of productos" class="product-card">
+            <h3>{{ producto.nombre }}</h3>
+            <p class="desc">{{ producto.descripcion }}</p>
+            <p class="price">${{ producto.precio.toFixed(2) }}</p>
+            <button class="btn btn-primary btn-block" (click)="comprarProducto(producto)">Comprar Ahora</button>
+          </div>
+        </div>
+      </section>
+
+      <section *ngIf="verSeccionFacturas" class="facturas-section">
+        <div *ngIf="facturas.length === 0" class="empty-state">
+          <p>No tienes facturas generadas aún. ¡Realiza tu primer pedido!</p>
+        </div>
+
+        <div class="facturas-list" *ngIf="facturas.length > 0">
+          <article *ngFor="let factura of facturas" class="factura-card">
+            <div class="factura-meta">
+              <p class="factura-id">Orden: {{ factura.id }}</p>
+              <p class="factura-date">Fecha: {{ factura.fecha }}</p>
+              <span class="status-badge">Completado</span>
+            </div>
+            <div class="factura-details">
+              <p class="factura-producto">{{ factura.producto }} ({{ factura.tamanio }})</p>
+              <p class="factura-cantidad">Cantidad: {{ factura.cantidad }}</p>
+              <button class="btn btn-primary btn-sm" (click)="verDetalleFactura(factura)">Ver Detalles</button>
+              <button class="btn btn-outline btn-sm" (click)="eliminarFactura(factura.id)" style="color: #dc3545; border-color: #dc3545; margin-left: 8px;">Eliminar</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section *ngIf="verSeccionNormas" class="iso-standards-section">
+        <div class="iso-grid">
+          <div class="iso-card">
+            <h3>ISO 9001</h3>
+            <p>Sistema de Gestión de Calidad</p>
+          </div>
+          <div class="iso-card">
+            <h3>ISO 14001</h3>
+            <p>Sistema de Gestión Ambiental</p>
+          </div>
+          <div class="iso-card">
+            <h3>ISO 45001</h3>
+            <p>Sistema de Gestión de Seguridad y Salud en el Trabajo</p>
+          </div>
+          <div class="iso-card">
+            <h3>ISO 27001</h3>
+            <p>Sistema de Gestión de Seguridad de la Información</p>
+          </div>
+        </div>
+      </section>
+
+      <section *ngIf="verSeccionQuejas" class="quejas-section">
+        <div class="form-container">
+          <form (ngSubmit)="enviarQueja()">
+            <div class="form-group">
+              <label>Tipo de Mensaje</label>
+              <select [(ngModel)]="queja.tipo" name="tipo" required class="form-control">
+                <option value="">Selecciona el tipo</option>
+                <option value="queja">Queja</option>
+                <option value="reclamo">Reclamo</option>
+                <option value="felicitacion">Felicitación</option>
+                <option value="sugerencia">Sugerencia</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Mensaje</label>
+              <textarea [(ngModel)]="queja.mensaje" name="mensaje" required class="form-control" rows="5" placeholder="Escribe tu mensaje aquí..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="cargandoQueja">
+              {{ cargandoQueja ? 'Enviando...' : 'Enviar Mensaje' }}
+            </button>
+          </form>
+          <p *ngIf="mensajeQueja" class="message">{{ mensajeQueja }}</p>
+        </div>
+      </section>
+
+      <section *ngIf="verSeccionCertificados" class="certificados-section">
+        <div class="form-container">
+          <form (ngSubmit)="subirCertificado()">
+            <div class="form-group">
+              <label>Tipo de Certificado</label>
+              <select [(ngModel)]="certificado.tipo" name="tipo" required class="form-control">
+                <option value="">Selecciona el tipo</option>
+                <option value="salud">Certificado de Salud</option>
+                <option value="trabajo">Certificado Laboral</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Seleccionar Archivo</label>
+              <input type="file" (change)="onArchivoSeleccionado($event)" accept=".pdf,.jpg,.png" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Subir Certificado</button>
+          </form>
+          <p *ngIf="mensajeCertificado" class="message">{{ mensajeCertificado }}</p>
+
+        <!-- Galería de Certificados Cargados -->
+        <div class="certificados-gallery" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+          <h3 style="margin-bottom: 15px;">Mis Documentos Cargados</h3>
+          <div *ngIf="certificados.length === 0" style="color: #666; font-style: italic;">No has subido certificados aún.</div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
+            <div *ngFor="let cert of certificados" class="cert-card" style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; text-align: center; background: #fff;">
+              <p style="font-weight: bold; font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase;">{{ cert.tipo }}</p>
+              
+              <!-- Previsualización si es imagen -->
+              <div *ngIf="cert.archivo && (cert.archivo.endsWith('.jpg') || cert.archivo.endsWith('.png') || cert.archivo.endsWith('.jpeg'))">
+                <img [src]="'http://localhost:3000/uploads/' + cert.archivo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer;" (click)="verArchivo(cert.archivo)">
+              </div>
+              
+              <!-- Icono si es PDF o no hay preview -->
+              <div *ngIf="!cert.archivo || (!cert.archivo.endsWith('.jpg') && !cert.archivo.endsWith('.png') && !cert.archivo.endsWith('.jpeg'))" style="height: 100px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 4px;">
+                <span style="font-size: 2rem;">📄</span>
+              </div>
+
+              <a [href]="'http://localhost:3000/uploads/' + cert.archivo" target="_blank" class="btn btn-outline btn-sm" style="font-size: 0.7rem; margin-top: 5px; width: 100%;">Abrir archivo</a>
+            </div>
+          </div>
+        </div>
+        </div>
+      </section>
+
+      <section *ngIf="verSeccionPolitica" class="politica-section">
+        <div class="politica-content">
+          <h3>Políticas de Seguridad de Información</h3>
+          
+          <h4>1. Política de Seguridad de la Información</h4>
+          <p>La empresa garantiza la confidencialidad, integridad y disponibilidad de la información asegurando que todos los datos serán protegidos contra pérdida, acceso no autorizado o alteración. Esta política será regida por La norma ISO/IEC 27001.</p>
+          
+          <h4>2. Política de Protección de Datos Personales</h4>
+          <p>La empresa garantiza la protección de los datos personales conforme a la Ley 1581 de 2012, donde esta ley asegura que los datos ingresados fueron autorizados, que el uso de la información sea el adecuado y que los titulares puedan modificar o eliminar los datos.</p>
+          
+          <h4>3. Política de Control de Acceso</h4>
+          <p>El acceso estará basado según el rol del usuario, donde cada usuario tendrá su propia credencial única y se prohíbe el compartir de contraseñas.</p>
+          
+          <h4>4. Política de Copia de Seguridad</h4>
+          <p>Se realizará de manera semanal una copia de seguridad o backup donde se guardará en la nube para una fácil obtención de la información.</p>
+          
+          <h4>5. Política de Gestión de Incidentes</h4>
+          <p>Todo tipo de incidentes debe ser reportado de manera inmediata, se realizará una inspección del incidente para comprobar que todo esté resuelto.</p>
+        </div>
+      </section>
+
+      <section *ngIf="verSeccionBackup" class="backup-section">
+        <div class="backup-content">
+          <h3>Copia de Seguridad</h3>
+          <p>Puedes solicitar una copia completa de tus datos personales almacenados en nuestro sistema.</p>
+          
+          <div class="backup-info">
+            <p><strong>Datos incluidos:</strong></p>
+            <ul>
+              <li>Información de perfil</li>
+              <li>Historial de compras</li>
+              <li>Certificados subidos</li>
+              <li>Mensajes enviados</li>
+            </ul>
+          </div>
+          
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary" (click)="descargarBackup()">Descargar Backup Ahora</button>
+            <button class="btn btn-outline" (click)="solicitarBackup()">Solicitar por Email</button>
+          </div>
+          
+          <p class="backup-note">La copia de seguridad será enviada a tu correo electrónico registrado de forma inmediata.</p>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalCompra" (click)="cerrarModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2>Confirmar Pedido</h2>
+        <p class="modal-product-name">{{ productoSeleccionado?.nombre }}</p>
+      </div>
+      <button class="btn btn-icon" (click)="cerrarModal()">Cerrar</button>
+    </div>
+
+    <div class="form-group">
+      <label>Cantidad de Pipetas</label>
+      <input type="number" [(ngModel)]="cantidadPipetas" min="1" max="100" class="form-control">
+    </div>
+    <div class="form-group">
+      <label>Tamaño Seleccionado</label>
+      <select [(ngModel)]="tamanioPipeta" class="form-control">
+        <option *ngFor="let tam of tamanios" [value]="tam">{{ tam }}</option>
+      </select>
+    </div>
+
+    <div class="modal-summary" style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #dee2e6;">
+      <p style="display: flex; justify-content: space-between; margin: 5px 0;">Subtotal: <span style="font-weight: 500;">${{ totalCalculado.toFixed(2) }}</span></p>
+      <p style="display: flex; justify-content: space-between; margin: 5px 0;">IVA (19%): <span style="font-weight: 500;">${{ (totalCalculado * 0.19).toFixed(2) }}</span></p>
+      <hr style="margin: 10px 0;">
+      <p class="total" style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; color: #007bff; margin: 0;">Total: <span>${{ (totalCalculado * 1.19).toFixed(2) }}</span></p>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cerrarModal()" [disabled]="cargandoCompra">Cancelar</button>
+      <button class="btn btn-primary" (click)="confirmarCompra()" [disabled]="cargandoCompra">
+        {{ cargandoCompra ? 'Procesando...' : 'Confirmar Pedido' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalFactura" (click)="cerrarModalFactura()">
+  <div class="modal-container receipt-modal" (click)="$event.stopPropagation()" style="max-width: 320px; width: 90%; padding: 15px;">
+    <div class="modal-header receipt-header" style="margin-bottom: 10px; padding-bottom: 5px;">
+      <div>
+        <h3 style="font-size: 1.1rem; margin: 0;">Recibo de Venta</h3>
+        <span class="factura-id-tag">{{ facturaSeleccionada?.id }}</span>
+      </div>
+      <button class="btn btn-icon" (click)="cerrarModalFactura()">Cerrar</button>
+    </div>
+
+    <div class="receipt-body" id="invoice-print-area" style="font-size: 0.85rem; line-height: 1.2;">
+      <p style="margin: 0 0 4px 0;"><strong>Fecha:</strong> {{ facturaSeleccionada?.fecha }}</p>
+      <p style="margin: 0 0 4px 0;"><strong>Cliente:</strong> {{ usuario.nombre }} {{ usuario.apellido }}</p>
+      <hr style="border-top: 1px dashed #ccc; margin: 8px 0;">
+      <p style="margin: 0 0 2px 0;"><strong>Producto:</strong> {{ facturaSeleccionada?.producto }}</p>
+      <p style="margin: 0 0 2px 0;"><strong>Tamaño:</strong> {{ facturaSeleccionada?.tamanio }}</p>
+      <p style="margin: 0 0 2px 0;"><strong>Cantidad:</strong> {{ facturaSeleccionada?.cantidad }} unidades</p>
+      <p style="margin: 0 0 2px 0;"><strong>Unitario:</strong> ${{ (+facturaSeleccionada?.total / +facturaSeleccionada?.cantidad).toFixed(2) }}</p>
+      <hr style="border-top: 1px dashed #ccc; margin: 8px 0;">
+      <p style="display: flex; justify-content: space-between; margin: 2px 0;">Subtotal: <span>${{ (+facturaSeleccionada?.total).toFixed(2) }}</span></p>
+      <p style="display: flex; justify-content: space-between; margin: 2px 0;">IVA (19%): <span>${{ (+facturaSeleccionada?.total * 0.19).toFixed(2) }}</span></p>
+      <div class="receipt-total-box" style="background-color: #28a745; color: white; padding: 8px; border-radius: 4px; margin-top: 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 1rem;">
+        <span>TOTAL</span>
+        <span>${{ (+facturaSeleccionada?.total * 1.19).toFixed(2) }}</span>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cerrarModalFactura()">Cerrar</button>
+      <button class="btn btn-primary" (click)="imprimirFactura()">Imprimir / PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal-overlay" *ngIf="mostrarModalEliminar" (click)="cerrarModalEliminar()">
+  <div class="modal-container delete-confirmation-modal" (click)="$event.stopPropagation()" style="max-width: 400px; text-align: center;">
+    <div class="modal-header" style="justify-content: center; border-bottom: none;">
+      <h2 style="color: #dc3545;">¿Eliminar Factura?</h2>
+    </div>
+    
+    <div class="modal-body" style="padding: 20px 0;">
+      <p>Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminar la orden <strong>#{{ idFacturaAEliminar }}</strong>?</p>
+    </div>
+
+    <div class="modal-actions" style="justify-content: center; gap: 15px;">
+      <button class="btn btn-secondary" (click)="cerrarModalEliminar()" [disabled]="cargandoEliminar">Cancelar</button>
+      <button class="btn btn-primary" (click)="confirmarEliminacion()" [disabled]="cargandoEliminar" style="background-color: #dc3545; border-color: #dc3545;">
+        Sí, Eliminar
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: transparent;
+}
+
+:host ::ng-deep body {
+  margin: 0;
+}

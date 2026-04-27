@@ -1,0 +1,34 @@
+<div class="auth-page">
+  <div class="auth-card card">
+    <div class="brand-container">
+      <img src="imagen1.png" alt="Logo PaisaGas" class="logo">
+      <div>
+        <p class="brand-label">PaisaGas</p>
+        <p class="brand-tag">Bienvenido de nuevo</p>
+      </div>
+    </div>
+
+    <h2>Iniciar sesión</h2>
+
+    <form #loginForm="ngForm" (ngSubmit)="login()" novalidate>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="Ingrese su email" [(ngModel)]="usuario.email" name="email" required>
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" placeholder="Ingrese su contraseña" [(ngModel)]="usuario.password" name="password" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+    </form>
+
+    <div class="auth-actions">
+      <button type="button" class="btn btn-secondary btn-block" (click)="irARegistro()">Registrar</button>
+      <button type="button" class="link-button" (click)="irARecuperarClave()">¿Olvidaste tu contraseña?</button>
+    </div>
+
+    <p class="message">{{ mensaje }}</p>
+  </div>
+</div>
