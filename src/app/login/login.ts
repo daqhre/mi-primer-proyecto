@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -15,18 +15,27 @@ import { Router } from '@angular/router';
 export class Login {
 
   usuario = { email: '', password: '' };
-  mensaje = '';
+  mensaje: string = '';
+  isError: boolean = false; // Nueva variable para controlar si el mensaje es un error
+  mostrarPassword: boolean = false; // Variable para controlar la visibilidad
 
-  constructor(private usuarioService: UsuariosService, private router: Router) { }
+  constructor(
+    private usuarioService: UsuariosService, 
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   login() {
     if (!this.usuario.email || !this.usuario.password) {
       this.mensaje = 'Por favor completa email y contraseña.';
+      this.isError = true; // Marcar como error
       return;
     }
 
     this.mensaje = 'Ingresando...';
-    console.log('Datos que envío al backend:', this.usuario);
+    this.isError = false; // Resetear el estado de error al iniciar el proceso
+    this.cdr.detectChanges();
+
     this.usuarioService.login(this.usuario).subscribe({
       next: (res: any) => {
         console.log('Respuesta del backend:', res);
@@ -34,12 +43,23 @@ export class Login {
           localStorage.setItem('usuarioActual', JSON.stringify(res.usuario));
           this.router.navigate(['/home']);
         } else {
-          this.mensaje = 'Error en la respuesta del servidor';
+          setTimeout(() => {
+            this.mensaje = 'Error en la respuesta del servidor';
+            this.isError = true;
+            this.cdr.detectChanges();
+          }, 0);
         }
       },
       error: err => {
-        console.log('Error del backend:', err);
-        this.mensaje = err.error?.error || 'Error al conectar con el servidor';
+        console.error('Error detectado:', err);
+        // Usamos setTimeout para forzar a Angular a refrescar la UI de inmediato
+        setTimeout(() => {
+          this.isError = true;
+          const errorBody = err.error;
+          // Captura el mensaje si es un objeto {error: '...'} o si es un string directo
+          this.mensaje = (errorBody && typeof errorBody === 'object' ? (errorBody.error || errorBody.message) : errorBody) || 'Error al conectar con el servidor';
+          this.cdr.detectChanges();
+        }, 0);
       }
     });
   }
@@ -50,5 +70,9 @@ export class Login {
 
   irARecuperarClave() {
     this.router.navigate(['/recuperar-password']);
+  }
+
+  togglePasswordVisibility() {
+    this.mostrarPassword = !this.mostrarPassword;
   }
 }

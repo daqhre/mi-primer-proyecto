@@ -503,7 +503,7 @@ app.post("/certificados", upload.single('archivo'), (req, res) => {
 });
 
 // Función para generar PDF
-function fillPDFDocument(doc, data) { // 'doc' is already the PDFDocument instance
+function fillPDFDocument(doc, data) { 
   // Encabezado
   doc.fontSize(20).text('Copia de Seguridad - MundiGas', { align: 'center' });
   doc.moveDown();
@@ -544,13 +544,13 @@ function fillPDFDocument(doc, data) { // 'doc' is already the PDFDocument instan
 }
 
 // Función auxiliar para obtener PDF como Buffer
-function obtenerPDFBuffer(data) { // Renamed to reflect its new purpose
+function obtenerPDFBuffer(data) { 
   return new Promise((resolve) => {
     const chunks = [];
     const doc = new PDFDocument();
     doc.on('data', chunk => chunks.push(chunk));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
-    fillPDFDocument(doc, data); // Fill the document
+    fillPDFDocument(doc, data); 
   });
 }
 

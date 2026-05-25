@@ -69,10 +69,14 @@ export class Home implements OnInit {
   facturas: any[] = [];
   certificados: any[] = [];
   verSeccionFacturas: boolean = false;
+  mostrarModalISO14001: boolean = false;
+  mostrarModalISO45001: boolean = false;
+  mostrarModalISO27001: boolean = false;
   verSeccionNormas: boolean = false;
   verSeccionQuejas: boolean = false;
   verSeccionCertificados: boolean = false;
   verSeccionPolitica: boolean = false;
+  mostrarModalFlujogramaISO9001: boolean = false;
   verSeccionBackup: boolean = false;
 
   // Detalle de factura
@@ -362,6 +366,38 @@ export class Home implements OnInit {
     localStorage.removeItem('usuarioActual');
     localStorage.removeItem('fotoPerfil');
     this.router.navigate(['/login']);
+  }
+
+  abrirFlujogramaISO9001() {
+    this.mostrarModalFlujogramaISO9001 = true;
+  }
+
+  cerrarModalFlujogramaISO9001() {
+    this.mostrarModalFlujogramaISO9001 = false;
+  }
+
+  abrirModalISO14001() {
+    this.mostrarModalISO14001 = true;
+  }
+
+  cerrarModalISO14001() {
+    this.mostrarModalISO14001 = false;
+  }
+
+  abrirModalISO45001() {
+    this.mostrarModalISO45001 = true;
+  }
+
+  cerrarModalISO45001() {
+    this.mostrarModalISO45001 = false;
+  }
+
+  abrirModalISO27001() {
+    this.mostrarModalISO27001 = true;
+  }
+
+  cerrarModalISO27001() {
+    this.mostrarModalISO27001 = false;
   }
 
   // Método para actualizar la foto de perfil

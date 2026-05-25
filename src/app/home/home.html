@@ -1,7 +1,7 @@
 <div class="home-shell">
   <aside class="sidebar">
     <div class="brand-info">
-      <img src="imagen1.png" alt="PaisaGas" class="logo-sidebar">
+      <img src="/imagen1.png" alt="PaisaGas" class="logo-sidebar">
       <div>
         <p class="brand-label">PaisaGas</p>
         <p class="brand-subtitle">Gas para tu hogar</p>
@@ -10,7 +10,7 @@
     
     <nav class="nav-menu">
       <button class="nav-item" [class.active]="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup" (click)="toggleVista('productos')">
-        Catálogo de Productos
+        Catálogo de Productos 
       </button>
       <button class="nav-item" [class.active]="verSeccionFacturas" (click)="toggleVista('factura')">
         Mis Facturas
@@ -41,7 +41,7 @@
     <section class="top-header">
       <div class="profile-pill">
         <div class="profile-img" [style.background-image]="fotoPerfil ? 'url(' + fotoPerfil + ')' : 'none'">
-        </div>
+        </div> 
         <div class="user-meta">
           <h2>{{ usuario.nombre }} {{ usuario.apellido }}</h2>
           <p>{{ usuario.email }}</p>
@@ -104,19 +104,23 @@
 
       <section *ngIf="verSeccionNormas" class="iso-standards-section">
         <div class="iso-grid">
-          <div class="iso-card">
+          <div class="iso-card" (click)="abrirFlujogramaISO9001()">
+            <img src="/Flujograma.png" alt="ISO 9001" class="iso-thumbnail">
             <h3>ISO 9001</h3>
             <p>Sistema de Gestión de Calidad</p>
           </div>
-          <div class="iso-card">
+          <div class="iso-card" (click)="abrirModalISO14001()">
+            <img src="/iso14001.png" alt="ISO 14001" class="iso-thumbnail">
             <h3>ISO 14001</h3>
             <p>Sistema de Gestión Ambiental</p>
           </div>
-          <div class="iso-card">
+          <div class="iso-card" (click)="abrirModalISO45001()">
+            <img src="/iso45001.png" alt="ISO 45001" class="iso-thumbnail">
             <h3>ISO 45001</h3>
             <p>Sistema de Gestión de Seguridad y Salud en el Trabajo</p>
           </div>
-          <div class="iso-card">
+          <div class="iso-card" (click)="abrirModalISO27001()">
+            <img src="/iso27001.png" alt="ISO 27001" class="iso-thumbnail">
             <h3>ISO 27001</h3>
             <p>Sistema de Gestión de Seguridad de la Información</p>
           </div>
@@ -275,6 +279,77 @@
       <button class="btn btn-primary" (click)="confirmarCompra()" [disabled]="cargandoCompra">
         {{ cargandoCompra ? 'Procesando...' : 'Confirmar Pedido' }}
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal ISO 14001 -->
+<div class="modal-overlay" *ngIf="mostrarModalISO14001" (click)="cerrarModalISO14001()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2>ISO 14001</h2>
+        <p class="modal-product-name">Sistema de Gestión Ambiental</p> 
+      </div>
+      <button class="btn btn-icon" (click)="cerrarModalISO14001()">Cerrar</button>
+    </div>
+    <div class="modal-body"> 
+      <img src="/iso14001.png" alt="ISO 14001" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+      <p style="margin-top: 15px; text-align: center;">Certificación en estándares internacionales de protección al medio ambiente.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal ISO 45001 -->
+<div class="modal-overlay" *ngIf="mostrarModalISO45001" (click)="cerrarModalISO45001()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2>ISO 45001</h2>
+        <p class="modal-product-name">Seguridad y Salud en el Trabajo</p>
+      </div>
+      <button class="btn btn-icon" (click)="cerrarModalISO45001()">Cerrar</button> 
+    </div>
+    <div class="modal-body">
+      <img src="/iso45001.png" alt="ISO 45001" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+      <p style="margin-top: 15px; text-align: center;">Compromiso con la seguridad de nuestros colaboradores y procesos.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal ISO 27001 -->
+<div class="modal-overlay" *ngIf="mostrarModalISO27001" (click)="cerrarModalISO27001()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2>ISO 27001</h2>
+        <p class="modal-product-name">Seguridad de la Información</p>
+      </div>
+      <button class="btn btn-icon" (click)="cerrarModalISO27001()">Cerrar</button> 
+    </div>
+    <div class="modal-body">
+      <img src="/iso27001.png" alt="ISO 27001" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+      <p style="margin-top: 15px; text-align: center;">Protección rigurosa de los datos de nuestros clientes y la empresa.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Flujograma ISO 9001 -->
+<div class="modal-overlay" *ngIf="mostrarModalFlujogramaISO9001" (click)="cerrarModalFlujogramaISO9001()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2>Flujograma ISO 9001</h2>
+        <p class="modal-product-name">Sistema de Gestión de Calidad</p>
+      </div>
+      <button class="btn btn-icon" (click)="cerrarModalFlujogramaISO9001()">Cerrar</button> 
+    </div>
+    <div class="modal-body">
+      <img src="/Flujograma.png" alt="Flujograma ISO 9001" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+      <p style="margin-top: 15px; text-align: center;">Este flujograma detalla los procesos clave del Sistema de Gestión de Calidad ISO 9001.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cerrarModalFlujogramaISO9001()">Cerrar</button>
     </div>
   </div>
 </div>

@@ -1,9 +1,13 @@
 ﻿.auth-page {
-  min-height: calc(100vh - 2rem);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1rem;
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .auth-card {
@@ -58,9 +62,25 @@ label {
   color: var(--text);
 }
 
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.8rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  z-index: 10;
+}
+
 input {
   width: 100%;
-  padding: 1rem 1.1rem;
+  padding: 1rem 3.5rem 1rem 1.1rem; /* Aumentamos padding derecho para el icono */
   border: 1px solid rgba(47, 128, 237, 0.2);
   border-radius: 16px;
   background: #fff;
@@ -88,6 +108,12 @@ input {
 .message {
   margin-top: 1rem;
   min-height: 1.2rem;
-  color: var(--danger);
+  color: var(--text); /* Color por defecto para mensajes no-error */
+  text-align: center;
+}
+
+.error-message {
+  color: red; /* Color rojo para mensajes de error */
+  font-weight: bold; /* Opcional: para que el mensaje de error sea más notorio */
   text-align: center;
 }
