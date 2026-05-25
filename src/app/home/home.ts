@@ -127,7 +127,7 @@ export class Home implements OnInit {
   }
 
   cargarFacturas() {
-    this.http.get(`http://localhost:3000/facturas?userId=${this.usuario.id}`, { responseType: 'json' }).subscribe({
+    this.http.get(`http://https://mi-primer-proyecto.onrender.comm/facturas?userId=${this.usuario.id}`, { responseType: 'json' }).subscribe({
       next: (data: any) => {
         this.facturas = data;
         this.cdr.detectChanges(); // Forzar actualización de la vista
@@ -144,7 +144,7 @@ export class Home implements OnInit {
       return;
     }
 
-    this.http.get(`http://localhost:3000/certificados?userId=${this.usuario.id}`, { responseType: 'json' }).subscribe({
+    this.http.get(`http://https://mi-primer-proyecto.onrender.comm/certificados?userId=${this.usuario.id}`, { responseType: 'json' }).subscribe({
       next: (data: any) => {
         this.certificados = data;
         this.cdr.detectChanges();
@@ -195,7 +195,7 @@ export class Home implements OnInit {
       total: totalPrecio
     };
 
-    this.http.post('http://localhost:3000/comprar', compraData, { responseType: 'text' }).subscribe({
+    this.http.post('http://https://mi-primer-proyecto.onrender.comm/comprar', compraData, { responseType: 'text' }).subscribe({
       next: (res) => {
         this.cerrarModal();
         this.toggleVista('factura');
@@ -222,7 +222,7 @@ export class Home implements OnInit {
       this.cargandoEliminar = true;
       this.cdr.detectChanges(); // Mostramos estado de carga en el modal de eliminación
 
-      this.http.delete(`http://localhost:3000/facturas/${this.idFacturaAEliminar}`, { responseType: 'text' }).subscribe({
+      this.http.delete(`http://https://mi-primer-proyecto.onrender.comm/facturas/${this.idFacturaAEliminar}`, { responseType: 'text' }).subscribe({
         next: () => {
           this.cerrarModalEliminar();
           this.cargandoEliminar = false;
@@ -273,7 +273,7 @@ export class Home implements OnInit {
       mensaje: this.queja.mensaje
     };
 
-    this.http.post('http://localhost:3000/quejas', quejaData, { responseType: 'text' }).subscribe({
+    this.http.post('http://https://mi-primer-proyecto.onrender.comm/quejas', quejaData, { responseType: 'text' }).subscribe({
       next: res => {
         this.mensajeQueja = 'Queja enviada exitosamente.';
         this.queja = { tipo: '', mensaje: '' };
@@ -301,7 +301,7 @@ export class Home implements OnInit {
       formData.append('archivo', this.certificado.archivo);
     }
 
-    this.http.post('http://localhost:3000/certificados', formData, { responseType: 'text' }).subscribe({
+    this.http.post('http://https://mi-primer-proyecto.onrender.comm/certificados', formData, { responseType: 'text' }).subscribe({
       next: res => {
         this.mensajeCertificado = 'Certificado subido exitosamente.';
         this.certificado = { tipo: '', archivo: null };
@@ -321,12 +321,12 @@ export class Home implements OnInit {
 
   verArchivo(nombreArchivo: string) {
     if (nombreArchivo) {
-      window.open(`http://localhost:3000/uploads/${nombreArchivo}`, '_blank');
+      window.open(`http://https://mi-primer-proyecto.onrender.comm/uploads/${nombreArchivo}`, '_blank');
     }
   }
 
   descargarBackup() {
-    this.http.get(`http://localhost:3000/backup-datos/${this.usuario.id}`, { responseType: 'blob' }).subscribe({
+    this.http.get(`http://https://mi-primer-proyecto.onrender.comm/backup-datos/${this.usuario.id}`, { responseType: 'blob' }).subscribe({
       next: (data: any) => {
         const blob = new Blob([data], { type: 'application/zip' });
         const url = window.URL.createObjectURL(blob);
@@ -343,7 +343,7 @@ export class Home implements OnInit {
   }
 
   solicitarBackup() {
-    this.http.post('http://localhost:3000/backup', { userId: this.usuario.id }, { responseType: 'text' }).subscribe(
+    this.http.post('http://https://mi-primer-proyecto.onrender.comm/backup', { userId: this.usuario.id }, { responseType: 'text' }).subscribe(
       res => {
         alert('Solicitud de copia de seguridad enviada. Recibirás un email cuando esté lista.');
       },

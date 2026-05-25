@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class UsuariosService {
 
-  private apiUrl = 'http://localhost:3000/registro';
+  private apiUrl = 'http://https://mi-primer-proyecto.onrender.comm/registro';
 
   constructor(private http: HttpClient) { }
 

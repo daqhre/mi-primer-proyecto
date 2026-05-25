@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class UsuariosService {
 
-  private apiUrl = 'http://localhost:3000/registro';
+  private apiUrl = 'http://https://mi-primer-proyecto.onrender.comm/registro';
 
   constructor(private http: HttpClient) { }
 
@@ -16,7 +16,7 @@ export class UsuariosService {
   }
 
   login(usuario: any): Observable<any> {
-    return this.http.post('http://localhost:3000/login', usuario);
+    return this.http.post('http://https://mi-primer-proyecto.onrender.comm/login', usuario);
   }
   
 }

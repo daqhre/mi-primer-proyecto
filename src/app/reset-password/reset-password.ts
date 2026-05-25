@@ -51,7 +51,7 @@ export class ResetPassword implements OnInit {
 
     const payload = { token: this.token, newPassword: this.newPassword };
 
-    this.http.post('http://localhost:3000/reset-password', payload, { responseType: 'text' })
+    this.http.post('http://https://mi-primer-proyecto.onrender.comm/reset-password', payload, { responseType: 'text' })
       .subscribe({
         next: (response) => {
           this.mensaje = response;
