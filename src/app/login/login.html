@@ -1,9 +1,9 @@
 <div class="auth-page">
   <div class="auth-card card">
     <div class="brand-container">
-      <img src="/imagen1.png" alt="Logo PaisaGas" class="logo">
+      <img src="/imagen1.png" alt="Logo Paisa Gas" class="logo">
       <div>
-        <p class="brand-label">PaisaGas</p>
+        <p class="brand-label">Paisa Gas</p>
         <p class="brand-tag">Bienvenido de nuevo</p>
       </div>
     </div>
@@ -12,8 +12,8 @@
 
     <form #loginForm="ngForm" (ngSubmit)="login()" novalidate>
       <div class="form-group">
-        <label>Email</label>
-        <input type="email" placeholder="Ingrese su email" [(ngModel)]="usuario.email" name="email" required>
+        <label>Correo electrónico</label>
+        <input type="email" placeholder="Ingrese su correo electrónico" [(ngModel)]="usuario.email" name="email" required>
       </div>
 
       <div class="form-group">

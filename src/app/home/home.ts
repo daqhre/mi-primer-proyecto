@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, HostListener } from '@angular/core';
+import { CommonModule, PlatformLocation } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -11,7 +11,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class Home implements OnInit {
+export class Home implements OnInit, OnDestroy {
   usuario: any = {};
   fotoPerfil: string = '';
   productos: any[] = [
@@ -68,6 +68,28 @@ export class Home implements OnInit {
   // Variables para facturación
   facturas: any[] = [];
   certificados: any[] = [];
+
+  fechaActualCalendario: Date = new Date();
+  hoyReal: Date = new Date();
+  diasCalendario: any[] = [];
+  mesesAnio: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  diasSemana: string[] = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+  // Configuración de promociones semanales recurrentes
+  promocionesSemanales: any = {
+    1: { titulo: 'Lunes de Hogar', aplicableA: 'x10', descuento: 0.10, color: '#ff4d4d' },
+    2: { titulo: 'Martes de Ahorro', aplicableA: 'x20', descuento: 0.10, color: '#ff944d' },
+    3: { titulo: 'Miércoles Especial', aplicableA: 'x30', descuento: 0.15, color: '#ffdb4d' },
+    4: { titulo: 'Jueves de Negocio', aplicableA: 'x40', descuento: 0.10, color: '#4dff88' },
+    5: { titulo: 'Viernes Premium', aplicableA: 'x100', descuento: 0.20, color: '#4d94ff' },
+    6: { titulo: 'Sábado de Parrilla', aplicableA: 'x20', descuento: 0.05, color: '#ff944d' },
+    0: { titulo: 'Domingo Familiar', aplicableA: 'x40', descuento: 0.05, color: '#4dff88' }
+  };
+
+  promociones: any[] = [
+    { fecha: '31', titulo: 'Super Cierre de Mes', descripcion: '10% de descuento en todas las referencias.', aplicableA: 'todas', descuento: 0.10 }
+  ];
+
   verSeccionFacturas: boolean = false;
   mostrarModalISO14001: boolean = false;
   mostrarModalISO45001: boolean = false;
@@ -76,8 +98,11 @@ export class Home implements OnInit {
   verSeccionQuejas: boolean = false;
   verSeccionCertificados: boolean = false;
   verSeccionPolitica: boolean = false;
+  verSeccionCalendario: boolean = false;
   mostrarModalFlujogramaISO9001: boolean = false;
+  verPromosHoy: boolean = false;
   verSeccionBackup: boolean = false;
+  mostrarModalQuejaExito: boolean = false;
 
   // Detalle de factura
   mostrarModalFactura: boolean = false;
@@ -89,6 +114,7 @@ export class Home implements OnInit {
     mensaje: ''
   };
   mensajeQueja: string = '';
+  diasRespuesta: number = 2;
 
   // Variables para certificados
   certificado = {
@@ -97,13 +123,36 @@ export class Home implements OnInit {
   };
   mensajeCertificado: string = '';
 
+  // Muestra una advertencia si el usuario intenta cerrar o refrescar la página
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: any) {
+    $event.returnValue = true;
+  }
+
+  private unregisterPopState: (() => void) | undefined;
+
   constructor(
     private router: Router, 
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private cdr: ChangeDetectorRef,
+    private platformLocation: PlatformLocation
+  ) {
+    // Detectamos cuando el usuario pulsa el botón de "atrás" del navegador
+    this.unregisterPopState = this.platformLocation.onPopState(() => {
+      const confirmacion = confirm("¿Estás seguro de querer salir? Si confirmas, se cerrará automáticamente la sesión.");
+      if (confirmacion) {
+        this.logout();
+      } else {
+        // Si cancela, volvemos a empujar el estado para que el usuario permanezca en el Home
+        window.history.pushState(null, '', window.location.href);
+      }
+    });
+  }
 
   ngOnInit() {
+    // Agregamos un estado extra al entrar para capturar el primer intento de retroceso
+    window.history.pushState(null, '', window.location.href);
+
     // Recuperar los datos del usuario de localStorage
     const usuarioGuardado = localStorage.getItem('usuarioActual');
     if (usuarioGuardado) {
@@ -124,10 +173,149 @@ export class Home implements OnInit {
 
     // Cargar certificados
     this.cargarCertificados();
+
+    // Inicializar el calendario de promociones
+    this.generarCalendario();
+  }
+
+  ngOnDestroy() {
+    // Limpiamos el escuchador global de popstate al salir del Home
+    if (this.unregisterPopState) {
+      this.unregisterPopState();
+    }
+  }
+
+  generarCalendario() {
+    const year = this.fechaActualCalendario.getFullYear();
+    const month = this.fechaActualCalendario.getMonth();
+    
+    // Obtener primer día de la semana (0=Dom, 1=Lun...)
+    const primerDiaSemana = new Date(year, month, 1).getDay();
+    const totalDiasMes = new Date(year, month + 1, 0).getDate();
+    
+    this.diasCalendario = [];
+    
+    // Espacios vacíos antes del día 1
+    for (let i = 0; i < primerDiaSemana; i++) {
+      this.diasCalendario.push(null);
+    }
+    
+    // Días del mes con sus promociones
+    for (let i = 1; i <= totalDiasMes; i++) {
+      const fechaStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
+      const fechaActualDía = new Date(year, month, i);
+      const diaSemana = fechaActualDía.getDay();
+      
+      // Lógica: Solo la segunda semana del mes (días 8 al 14) tiene promos por pipeta
+      const esSemanaPromo = i >= 8 && i <= 14;
+      const promoSemanal = esSemanaPromo ? this.promocionesSemanales[diaSemana] : null;
+
+      // Promoción especial del día 31
+      const promoFija = i === 31 ? this.promociones[0] : null;
+
+      const esHoy = i === this.hoyReal.getDate() && 
+                   month === this.hoyReal.getMonth() && 
+                   year === this.hoyReal.getFullYear();
+
+      this.diasCalendario.push({
+        dia: i,
+        promocion: promoSemanal || promoFija || null,
+        esHoy: esHoy,
+        color: promoFija ? '#FFD700' : (promoSemanal ? promoSemanal.color : 'transparent'),
+        texto: promoFija ? '31' : (promoSemanal ? promoSemanal.aplicableA : '')
+      });
+    }
+  }
+
+  cambiarMes(delta: number) {
+    this.fechaActualCalendario.setMonth(this.fechaActualCalendario.getMonth() + delta);
+    this.fechaActualCalendario = new Date(this.fechaActualCalendario); // Clonar para forzar actualización
+    this.generarCalendario();
+  }
+
+  get promocionesDelMes() {
+    const year = this.fechaActualCalendario.getFullYear();
+    const month = this.fechaActualCalendario.getMonth();
+    const list = [];
+    // Generamos el string de la fecha de hoy para comparar (Formato YYYY-MM-DD local)
+    const hoyStr = `${this.hoyReal.getFullYear()}-${(this.hoyReal.getMonth() + 1).toString().padStart(2, '0')}-${this.hoyReal.getDate().toString().padStart(2, '0')}`;
+
+    // Promo del 31 (si el mes lo tiene)
+    const ultimoDiaMes = new Date(year, month + 1, 0).getDate();
+    if (ultimoDiaMes >= 31) {
+      const fStr = `${year}-${(month + 1).toString().padStart(2, '0')}-31`;
+      list.push({
+        fecha: fStr,
+        titulo: this.promociones[0].titulo,
+        descripcion: this.promociones[0].descripcion,
+        esHoy: fStr === hoyStr
+      });
+    }
+
+    // Semana de promociones (8 al 14)
+    for (let d = 8; d <= 14; d++) {
+      const fecha = new Date(year, month, d);
+      const ds = fecha.getDay();
+      const p = this.promocionesSemanales[ds];
+      const fStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+      list.push({
+        fecha: fStr,
+        titulo: p.titulo,
+        descripcion: `Hoy descuento del ${p.descuento * 100}% en pipetas ${p.aplicableA}`,
+        esHoy: fStr === hoyStr
+      });
+    }
+    return list.sort((a, b) => a.fecha.localeCompare(b.fecha));
+  }
+
+  togglePromosHoy() {
+    this.verPromosHoy = !this.verPromosHoy;
+  }
+
+  get fechaActualEspanyol(): string {
+    const diaNombre = this.diasSemana[this.hoyReal.getDay()];
+    const diaNum = this.hoyReal.getDate();
+    const mesNombre = this.mesesAnio[this.hoyReal.getMonth()];
+    const anio = this.hoyReal.getFullYear();
+    return `${diaNombre}, ${diaNum} de ${mesNombre} de ${anio}`;
+  }
+
+  get infoPromocionHoy() {
+    const promo = this.getPromocionHoy();
+    if (!promo) return null;
+
+    // Si es promoción semanal (que no tiene descripción fija en el objeto), generamos una dinámica
+    if (!promo.descripcion) {
+      return {
+        titulo: promo.titulo,
+        descripcion: `¡Hoy tenemos un ${promo.descuento * 100}% de descuento especial en todas las pipetas tamaño ${promo.aplicableA}!`
+      };
+    }
+    return promo;
+  }
+
+  getPromocionHoy() {
+    const dia = this.hoyReal.getDate();
+    // Prioridad 1: Día 31
+    if (dia === 31) return this.promociones[0];
+
+    // Prioridad 2: Semana de promo (8-14)
+    if (dia >= 8 && dia <= 14) {
+      return this.promocionesSemanales[this.hoyReal.getDay()];
+    }
+    return null;
+  }
+
+  get descuentoActivo(): number {
+    const promo = this.getPromocionHoy();
+    if (promo && (promo.aplicableA === this.tamanioPipeta || promo.aplicableA === 'todas')) {
+      return promo.descuento;
+    }
+    return 0;
   }
 
   cargarFacturas() {
-    this.http.get(`http://https://mi-primer-proyecto.onrender.comm/facturas?userId=${this.usuario.id}`, { responseType: 'json' }).subscribe({
+    this.http.get(`http://localhost:3000/facturas?userId=${this.usuario.id}`, { responseType: 'json' }).subscribe({
       next: (data: any) => {
         this.facturas = data;
         this.cdr.detectChanges(); // Forzar actualización de la vista
@@ -144,7 +332,7 @@ export class Home implements OnInit {
       return;
     }
 
-    this.http.get(`http://https://mi-primer-proyecto.onrender.comm/certificados?userId=${this.usuario.id}`, { responseType: 'json' }).subscribe({
+    this.http.get(`http://localhost:3000/certificados?userId=${this.usuario.id}`, { responseType: 'json' }).subscribe({
       next: (data: any) => {
         this.certificados = data;
         this.cdr.detectChanges();
@@ -162,17 +350,28 @@ export class Home implements OnInit {
     this.mostrarModalCompra = true;
   }
 
-  get precioPorUnidad(): number {
+  // --- Nuevos Getters para el Desglose de Factura ---
+  get subtotalCompra(): number {
     if (!this.productoSeleccionado) return 0;
-    // Extraemos el número del tamaño (ej: 'x100' -> 100)
     const kilos = parseInt(this.tamanioPipeta.substring(1), 10);
-    // Asumimos que el precio base en la lista es para 10kg, calculamos el factor
     const factor = kilos / 10;
-    return this.productoSeleccionado.precio * factor;
+    return (this.productoSeleccionado.precio * factor) * this.cantidadPipetas;
+  }
+
+  get montoDescuento(): number {
+    return this.subtotalCompra * this.descuentoActivo;
+  }
+
+  get baseConDescuento(): number {
+    return this.subtotalCompra - this.montoDescuento;
+  }
+
+  get ivaCalculado(): number {
+    return this.baseConDescuento * 0.19;
   }
 
   get totalCalculado(): number {
-    return this.precioPorUnidad * this.cantidadPipetas;
+    return this.baseConDescuento + this.ivaCalculado;
   }
 
   cerrarModal() {
@@ -185,21 +384,26 @@ export class Home implements OnInit {
     this.cargandoCompra = true;
     this.cdr.detectChanges(); // Forzamos a que el botón muestre "Procesando..." inmediatamente
 
-    const totalPrecio = this.totalCalculado;
+    const promo = this.getPromocionHoy();
+    const nombrePromo = (this.descuentoActivo > 0 && promo) ? promo.titulo : 'Sin promoción';
 
     const compraData = {
       userId: this.usuario.id,
       producto: this.productoSeleccionado.nombre,
       cantidad: this.cantidadPipetas,
       tamanio: this.tamanioPipeta,
-      total: totalPrecio
+      subtotal: this.subtotalCompra,
+      iva: this.ivaCalculado,
+      descuento: this.montoDescuento,
+      total: this.totalCalculado,
+      promocion: nombrePromo
     };
 
-    this.http.post('http://https://mi-primer-proyecto.onrender.comm/comprar', compraData, { responseType: 'text' }).subscribe({
+    this.http.post('http://localhost:3000/comprar', compraData, { responseType: 'text' }).subscribe({
       next: (res) => {
         this.cerrarModal();
         this.toggleVista('factura');
-        this.cargarFacturas(); // Recargar facturas después de cambiar de vista
+        this.cargarFacturas();
         this.cargandoCompra = false;
         this.cdr.detectChanges(); // Forzamos el refresco de la UI
       },
@@ -222,10 +426,10 @@ export class Home implements OnInit {
       this.cargandoEliminar = true;
       this.cdr.detectChanges(); // Mostramos estado de carga en el modal de eliminación
 
-      this.http.delete(`http://https://mi-primer-proyecto.onrender.comm/facturas/${this.idFacturaAEliminar}`, { responseType: 'text' }).subscribe({
+      this.http.delete(`http://localhost:3000/facturas/${this.idFacturaAEliminar}`, { responseType: 'text' }).subscribe({
         next: () => {
-          this.cerrarModalEliminar();
           this.cargandoEliminar = false;
+          this.cerrarModalEliminar();
           this.cargarFacturas();
           this.cdr.detectChanges();
         },
@@ -267,17 +471,28 @@ export class Home implements OnInit {
     this.cargandoQueja = true;
     this.cdr.detectChanges();
 
+    const tipoEnviado = this.queja.tipo; // Capturamos el tipo antes de resetear el objeto
+
     const quejaData = {
       userId: this.usuario.id,
-      tipo: this.queja.tipo,
+      tipo: tipoEnviado,
       mensaje: this.queja.mensaje
     };
 
-    this.http.post('http://https://mi-primer-proyecto.onrender.comm/quejas', quejaData, { responseType: 'text' }).subscribe({
+    this.http.post('http://localhost:3000/quejas', quejaData, { responseType: 'text' }).subscribe({
       next: res => {
-        this.mensajeQueja = 'Queja enviada exitosamente.';
+        const mensajes: any = {
+          'queja': 'Su queja fue enviada con éxito.',
+          'reclamo': 'Su reclamo fue enviado con éxito.',
+          'felicitacion': 'Su felicitación fue enviada con éxito.',
+          'sugerencia': 'Su sugerencia fue enviada con éxito.'
+        };
+        this.mensajeQueja = mensajes[tipoEnviado] || 'Mensaje enviado exitosamente.';
+        this.diasRespuesta = 2;
+
         this.queja = { tipo: '', mensaje: '' };
         this.cargandoQueja = false;
+        this.mostrarModalQuejaExito = true;
         this.cdr.detectChanges();
       },
       error: err => {
@@ -286,6 +501,10 @@ export class Home implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  cerrarModalQuejaExito() {
+    this.mostrarModalQuejaExito = false;
   }
 
   subirCertificado() {
@@ -301,7 +520,7 @@ export class Home implements OnInit {
       formData.append('archivo', this.certificado.archivo);
     }
 
-    this.http.post('http://https://mi-primer-proyecto.onrender.comm/certificados', formData, { responseType: 'text' }).subscribe({
+    this.http.post('http://localhost:3000/certificados', formData, { responseType: 'text' }).subscribe({
       next: res => {
         this.mensajeCertificado = 'Certificado subido exitosamente.';
         this.certificado = { tipo: '', archivo: null };
@@ -321,12 +540,12 @@ export class Home implements OnInit {
 
   verArchivo(nombreArchivo: string) {
     if (nombreArchivo) {
-      window.open(`http://https://mi-primer-proyecto.onrender.comm/uploads/${nombreArchivo}`, '_blank');
+      window.open(`http://localhost:3000/uploads/${nombreArchivo}`, '_blank');
     }
   }
 
   descargarBackup() {
-    this.http.get(`http://https://mi-primer-proyecto.onrender.comm/backup-datos/${this.usuario.id}`, { responseType: 'blob' }).subscribe({
+    this.http.get(`http://localhost:3000/backup-datos/${this.usuario.id}`, { responseType: 'blob' }).subscribe({
       next: (data: any) => {
         const blob = new Blob([data], { type: 'application/zip' });
         const url = window.URL.createObjectURL(blob);
@@ -343,9 +562,9 @@ export class Home implements OnInit {
   }
 
   solicitarBackup() {
-    this.http.post('http://https://mi-primer-proyecto.onrender.comm/backup', { userId: this.usuario.id }, { responseType: 'text' }).subscribe(
+    this.http.post('http://localhost:3000/backup', { userId: this.usuario.id }, { responseType: 'text' }).subscribe(
       res => {
-        alert('Solicitud de copia de seguridad enviada. Recibirás un email cuando esté lista.');
+        alert('Solicitud de copia de seguridad enviada. Recibirás un correo electrónico cuando esté lista.');
       },
       err => {
         alert('Error al solicitar la copia de seguridad.');
@@ -360,12 +579,13 @@ export class Home implements OnInit {
     this.verSeccionCertificados = (seccion === 'certificados');
     this.verSeccionPolitica = (seccion === 'politica');
     this.verSeccionBackup = (seccion === 'backup');
+    this.verSeccionCalendario = (seccion === 'calendario');
   }
 
   logout() {
     localStorage.removeItem('usuarioActual');
     localStorage.removeItem('fotoPerfil');
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login'], { replaceUrl: true });
   }
 
   abrirFlujogramaISO9001() {
@@ -409,6 +629,7 @@ export class Home implements OnInit {
         this.fotoPerfil = e.target.result;
         // Guardar la foto en localStorage también
         localStorage.setItem('fotoPerfil', this.fotoPerfil);
+        this.cdr.detectChanges(); // Forzar actualización de la vista inmediata
       };
       reader.readAsDataURL(file);
     }

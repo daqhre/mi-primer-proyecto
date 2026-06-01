@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class Login {
+export class Login implements OnInit {
 
   usuario = { email: '', password: '' };
   mensaje: string = '';
@@ -24,6 +24,13 @@ export class Login {
     private router: Router,
     private cdr: ChangeDetectorRef
   ) { }
+
+  ngOnInit() {
+    // Si el usuario ya está logueado, redirigir al home automáticamente
+    if (localStorage.getItem('usuarioActual')) {
+      this.router.navigate(['/home'], { replaceUrl: true });
+    }
+  }
 
   login() {
     if (!this.usuario.email || !this.usuario.password) {
@@ -41,7 +48,8 @@ export class Login {
         console.log('Respuesta del backend:', res);
         if (res && res.usuario) {
           localStorage.setItem('usuarioActual', JSON.stringify(res.usuario));
-          this.router.navigate(['/home']);
+          // replaceUrl: true evita que el usuario pueda volver al login con el botón "atrás"
+          this.router.navigate(['/home'], { replaceUrl: true });
         } else {
           setTimeout(() => {
             this.mensaje = 'Error en la respuesta del servidor';

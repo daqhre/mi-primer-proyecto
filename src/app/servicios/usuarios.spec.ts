@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class UsuariosService {
 
-  private apiUrl = 'http://https://mi-primer-proyecto.onrender.comm/registro';
+  private apiUrl = 'http://src/app/home/home.tsm/registro';
 
   constructor(private http: HttpClient) { }
 

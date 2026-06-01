@@ -1,16 +1,19 @@
 <div class="home-shell">
   <aside class="sidebar">
     <div class="brand-info">
-      <img src="/imagen1.png" alt="PaisaGas" class="logo-sidebar">
+      <img src="/imagen1.png" alt="Paisa Gas" class="logo-sidebar">
       <div>
-        <p class="brand-label">PaisaGas</p>
+        <p class="brand-label">Paisa Gas</p>
         <p class="brand-subtitle">Gas para tu hogar</p>
       </div>
     </div>
     
     <nav class="nav-menu">
-      <button class="nav-item" [class.active]="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup" (click)="toggleVista('productos')">
+      <button class="nav-item" [class.active]="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup && !verSeccionCalendario" (click)="toggleVista('productos')">
         Catálogo de Productos 
+      </button>
+      <button class="nav-item" [class.active]="verSeccionCalendario" (click)="toggleVista('calendario')">
+        Próximas Promociones
       </button>
       <button class="nav-item" [class.active]="verSeccionFacturas" (click)="toggleVista('factura')">
         Mis Facturas
@@ -38,7 +41,32 @@
   </aside>
 
   <main class="content-area">
-    <section class="top-header">
+    <section class="top-header" style="display: flex; align-items: center; gap: 15px; padding: 15px 30px;">
+      <!-- Campanita de Notificaciones de Promoción (Fuera del perfil y más discreta) -->
+      <div class="notification-bell-container" style="position: relative;">
+        <button class="btn-bell" (click)="togglePromosHoy()" style="background: white; border: 1px solid #e2e8f0; cursor: pointer; font-size: 1.3rem; position: relative; padding: 8px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+          <span [style.color]="descuentoActivo > 0 ? '#f1c40f' : '#cbd5e0'">🔔</span>
+          <span *ngIf="descuentoActivo > 0" style="position: absolute; top: -4px; right: -4px; background: #ef4444; color: white; border-radius: 50%; width: 17px; height: 17px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white;">
+            1
+          </span>
+        </button>
+
+        <!-- Menú Desplegable de Promociones -->
+        <div *ngIf="verPromosHoy" class="promos-today-popover" style="position: absolute; top: 50px; left: 0; background: white; width: 280px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1000; padding: 15px; border: 1px solid #edf2f7;">
+          <h4 style="margin: 0 0 10px 0; color: #102047; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+            🎁 Ofertas de Hoy
+          </h4>
+          <div *ngIf="!infoPromocionHoy" style="color: #718096; font-style: italic; text-align: center; padding: 10px; font-size: 0.85rem;">
+            No hay promociones activas hoy.
+          </div>
+          <div *ngIf="infoPromocionHoy" class="today-promo-content" style="background: #f8fafc; padding: 10px; border-radius: 8px; border-left: 4px solid #f1c40f;">
+            <p style="margin: 0; font-weight: 600; color: #2d3748; font-size: 0.95rem;">{{ infoPromocionHoy.titulo }}</p>
+            <p style="margin: 5px 0 0 0; font-size: 0.8rem; color: #4a5568; line-height: 1.4;">{{ infoPromocionHoy.descripcion }}</p>
+          </div>
+          <button class="btn btn-primary btn-sm btn-block" style="margin-top: 12px; width: 100%; font-size: 0.8rem;" (click)="verPromosHoy = false">Cerrar</button>
+        </div>
+      </div>
+
       <div class="profile-pill">
         <div class="profile-img" [style.background-image]="fotoPerfil ? 'url(' + fotoPerfil + ')' : 'none'">
         </div> 
@@ -53,23 +81,92 @@
 
     <section class="page-section">
       <header class="page-header">
-        <h1 class="section-title" *ngIf="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup">Catálogo de Productos</h1>
+        <h1 class="section-title" *ngIf="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup && !verSeccionCalendario">Catálogo de Productos</h1>
         <h1 class="section-title" *ngIf="verSeccionFacturas">Mis Facturas</h1>
         <h1 class="section-title" *ngIf="verSeccionNormas">Normas ISO Certificadas</h1>
         <h1 class="section-title" *ngIf="verSeccionQuejas">Quejas, Reclamos y Felicitaciones</h1>
         <h1 class="section-title" *ngIf="verSeccionCertificados">Certificados de Salud y Trabajo</h1>
         <h1 class="section-title" *ngIf="verSeccionPolitica">Política de Seguridad de Información</h1>
         <h1 class="section-title" *ngIf="verSeccionBackup">Copia de Seguridad</h1>
-        <p class="section-desc" *ngIf="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup">Selecciona la pipeta que necesites para tu hogar o negocio.</p>
+        <h1 class="section-title" *ngIf="verSeccionCalendario">Calendario de Promociones</h1>
+
+        <p class="section-desc" *ngIf="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup && !verSeccionCalendario">Selecciona la pipeta que necesites para tu hogar o negocio.</p>
         <p class="section-desc" *ngIf="verSeccionFacturas">Aquí encontrarás el registro de todas tus compras exitosas.</p>
-        <p class="section-desc" *ngIf="verSeccionNormas">PaisaGas cumple con las siguientes normas internacionales de calidad y seguridad.</p>
+        <p class="section-desc" *ngIf="verSeccionNormas">Paisa Gas cumple con las siguientes normas internacionales de calidad y seguridad.</p>
         <p class="section-desc" *ngIf="verSeccionQuejas">Envíanos tus comentarios, quejas o felicitaciones. Tu opinión es importante para nosotros.</p>
         <p class="section-desc" *ngIf="verSeccionCertificados">Sube tus certificados de salud y trabajo para mantener tu perfil actualizado.</p>
         <p class="section-desc" *ngIf="verSeccionPolitica">Conoce nuestras políticas de seguridad y protección de datos.</p>
         <p class="section-desc" *ngIf="verSeccionBackup">Solicita una copia de seguridad de tus datos personales.</p>
+        <p class="section-desc" *ngIf="verSeccionCalendario">Entérate de nuestros próximos descuentos y eventos especiales.</p>
       </header>
 
-      <section *ngIf="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup" class="products-section">
+      <section *ngIf="verSeccionCalendario" class="calendario-section">
+        <div class="current-date-badge" style="text-align: center; margin-bottom: 25px; background: #102047; color: white; padding: 15px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+          <p style="margin: 0; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; opacity: 0.8;">Hoy es</p>
+          <h2 style="margin: 5px 0 0 0; font-size: 1.8rem;">{{ fechaActualEspanyol }}</h2>
+          <div *ngIf="descuentoActivo > 0" style="margin-top: 10px; background: #28a745; display: inline-block; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">
+            🎉 ¡Promoción Activa: {{ getPromocionHoy()?.titulo }}!
+          </div>
+        </div>
+
+        <div class="calendar-container" style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 600px; margin: 0 auto;">
+          <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: #102047;">
+            <button (click)="cambiarMes(-1)" style="font-weight: bold; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background-color: #102047; color: white; border: none; cursor: pointer; font-size: 1.5rem; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(16, 32, 71, 0.3);">&lt;</button>
+            <h2 style="margin: 0; color: #102047; text-transform: capitalize; font-size: 1.4rem;">{{ mesesAnio[fechaActualCalendario.getMonth()] }} {{ fechaActualCalendario.getFullYear() }}</h2>
+            <button (click)="cambiarMes(1)" style="font-weight: bold; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background-color: #102047; color: white; border: none; cursor: pointer; font-size: 1.5rem; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(16, 32, 71, 0.3);">&gt;</button>
+          </div>
+
+          <div class="week-days" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: bold; color: #102047; margin-bottom: 10px; font-size: 0.85rem;">
+            <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+          </div>
+
+          <div class="days-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+            <div *ngFor="let diaInfo of diasCalendario" 
+                 [style.background-color]="diaInfo?.color"
+                 [style.border]="diaInfo?.esHoy ? '3px solid #FFD700' : '1px solid #eee'"
+                 [style.box-shadow]="diaInfo?.esHoy ? '0 0 10px rgba(255,215,0,0.5)' : 'none'"
+                 style="aspect-ratio: 1; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; min-height: 60px; transition: all 0.3s ease;">
+              <span *ngIf="diaInfo" [style.color]="diaInfo?.promocion ? '#fff' : '#333'" [style.text-shadow]="diaInfo?.promocion ? '1px 1px 2px rgba(0,0,0,0.3)' : 'none'" style="font-weight: 700; font-size: 1.1rem;">{{ diaInfo.dia }}</span>
+              <span *ngIf="diaInfo?.promocion" style="font-size: 0.6rem; color: white; font-weight: bold;">{{ diaInfo.texto }}</span>
+              <div *ngIf="diaInfo?.esHoy" style="position: absolute; top: -5px; right: -5px; background: #FFD700; color: #102047; font-size: 0.5rem; padding: 2px 5px; border-radius: 5px; font-weight: bold;">HOY</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="month-promos" style="margin-top: 40px; max-width: 1000px; margin-left: auto; margin-right: auto;">
+          <h3 style="color: #102047; margin-bottom: 20px; font-size: 1.5rem;">Detalles de Promociones del Mes</h3>
+          <div *ngIf="promocionesDelMes.length === 0" style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 15px; color: #999; font-style: italic;">
+            No hay promociones programadas para este mes.
+          </div>
+          
+          <div class="promos-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+            <div *ngFor="let promo of promocionesDelMes" 
+                 class="promo-card" 
+                 [style.border-left]="promo.esHoy ? '6px solid #FFD700' : '5px solid #007bff'"
+                 [style.background-color]="promo.esHoy ? '#fffdf0' : 'white'"
+                 [style.box-shadow]="promo.esHoy ? '0 8px 25px rgba(255, 215, 0, 0.2)' : '0 4px 12px rgba(0,0,0,0.05)'"
+                 [style.transform]="promo.esHoy ? 'scale(1.03)' : 'none'"
+                 style="padding: 20px; border-radius: 15px; transition: all 0.3s ease; position: relative; display: flex; flex-direction: column; justify-content: space-between;">
+              
+              <div *ngIf="promo.esHoy" style="position: absolute; top: -12px; right: 15px; background: #FFD700; color: #102047; font-size: 0.7rem; padding: 3px 10px; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1;">ACTIVA HOY</div>
+
+              <div>
+                <div style="margin-bottom: 12px;">
+                  <span [style.background-color]="promo.esHoy ? '#FFD700' : '#eef6ff'" 
+                        [style.color]="promo.esHoy ? '#102047' : '#007bff'"
+                        style="font-weight: 800; font-size: 0.85rem; padding: 5px 12px; border-radius: 50px; text-transform: uppercase;">
+                    Día {{ promo.fecha | date:'dd' }}
+                  </span>
+                </div>
+                <h4 style="margin: 0 0 10px 0; color: #102047; font-size: 1.15rem; font-weight: 700; line-height: 1.3;">{{ promo.titulo }}</h4>
+                <p style="margin: 0; font-size: 0.9rem; color: #555; line-height: 1.5;">{{ promo.descripcion }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section *ngIf="!verSeccionFacturas && !verSeccionNormas && !verSeccionQuejas && !verSeccionCertificados && !verSeccionPolitica && !verSeccionBackup && !verSeccionCalendario" class="products-section">
         <div class="productos-grid">
           <div *ngFor="let producto of productos" class="product-card">
             <h3>{{ producto.nombre }}</h3>
@@ -183,15 +280,15 @@
               
               <!-- Previsualización si es imagen -->
               <div *ngIf="cert.archivo && (cert.archivo.endsWith('.jpg') || cert.archivo.endsWith('.png') || cert.archivo.endsWith('.jpeg'))">
-                <img [src]="'http://https://mi-primer-proyecto.onrender.comm/uploads/' + cert.archivo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer;" (click)="verArchivo(cert.archivo)">
+                <img [src]="'http://localhost:3000/uploads/' + cert.archivo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer;" (click)="verArchivo(cert.archivo)">
               </div>
               
               <!-- Icono si es PDF o no hay preview -->
-              <div *ngIf="!cert.archivo || (!cert.archivo.endsWith('.jpg') && !cert.archivo.endsWith('.png') && !cert.archivo.endsWith('.jpeg'))" style="height: 100px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 4px;">
+              <div *ngIf="!cert.archivo || (!cert.archivo.endsWith('.jpg') && !cert.archivo.endsWith('.png') && !cert.archivo.endsWith('.jpeg'))" style="height: 100px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 4px; cursor: pointer;" (click)="verArchivo(cert.archivo)">
                 <span style="font-size: 2rem;">📄</span>
               </div>
 
-              <a [href]="'http://https://mi-primer-proyecto.onrender.comm/uploads/' + cert.archivo" target="_blank" class="btn btn-outline btn-sm" style="font-size: 0.7rem; margin-top: 5px; width: 100%;">Abrir archivo</a>
+              <button class="btn btn-outline btn-sm" style="font-size: 0.7rem; margin-top: 5px; width: 100%;" (click)="verArchivo(cert.archivo)">Abrir archivo</button>
             </div>
           </div>
         </div>
@@ -236,7 +333,7 @@
           
           <div style="display: flex; gap: 10px;">
             <button class="btn btn-primary" (click)="descargarBackup()">Descargar Backup Ahora</button>
-            <button class="btn btn-outline" (click)="solicitarBackup()">Solicitar por Email</button>
+            <button class="btn btn-outline" (click)="solicitarBackup()">Solicitar por Correo electrónico</button>
           </div>
           
           <p class="backup-note">La copia de seguridad será enviada a tu correo electrónico registrado de forma inmediata.</p>
@@ -268,10 +365,11 @@
     </div>
 
     <div class="modal-summary" style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #dee2e6;">
-      <p style="display: flex; justify-content: space-between; margin: 5px 0;">Subtotal: <span style="font-weight: 500;">${{ totalCalculado.toFixed(2) }}</span></p>
-      <p style="display: flex; justify-content: space-between; margin: 5px 0;">IVA (19%): <span style="font-weight: 500;">${{ (totalCalculado * 0.19).toFixed(2) }}</span></p>
+      <p style="display: flex; justify-content: space-between; margin: 5px 0;">Subtotal: <span style="font-weight: 500;">${{ subtotalCompra.toFixed(2) }}</span></p>
+      <p *ngIf="descuentoActivo > 0" style="display: flex; justify-content: space-between; margin: 5px 0; color: #dc3545;">Descuento: <span style="font-weight: 500;">-${{ montoDescuento.toFixed(2) }}</span></p>
+      <p style="display: flex; justify-content: space-between; margin: 5px 0;">IVA (19%): <span style="font-weight: 500;">${{ ivaCalculado.toFixed(2) }}</span></p>
       <hr style="margin: 10px 0;">
-      <p class="total" style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; color: #007bff; margin: 0;">Total: <span>${{ (totalCalculado * 1.19).toFixed(2) }}</span></p>
+      <p class="total" style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; color: #007bff; margin: 0;">Total: <span>${{ totalCalculado.toFixed(2) }}</span></p>
     </div>
 
     <div class="modal-actions">
@@ -358,26 +456,29 @@
   <div class="modal-container receipt-modal" (click)="$event.stopPropagation()" style="max-width: 320px; width: 90%; padding: 15px;">
     <div class="modal-header receipt-header" style="margin-bottom: 10px; padding-bottom: 5px;">
       <div>
-        <h3 style="font-size: 1.1rem; margin: 0;">Recibo de Venta</h3>
+        <h3 style="font-size: 1.1rem; margin: 0;">Recibo de Factura</h3>
         <span class="factura-id-tag">{{ facturaSeleccionada?.id }}</span>
       </div>
       <button class="btn btn-icon" (click)="cerrarModalFactura()">Cerrar</button>
     </div>
 
-    <div class="receipt-body" id="invoice-print-area" style="font-size: 0.85rem; line-height: 1.2;">
+    <div class="receipt-body" id="invoice-print-area" style="font-size: 0.85rem; line-height: 1.4;">
       <p style="margin: 0 0 4px 0;"><strong>Fecha:</strong> {{ facturaSeleccionada?.fecha }}</p>
       <p style="margin: 0 0 4px 0;"><strong>Cliente:</strong> {{ usuario.nombre }} {{ usuario.apellido }}</p>
       <hr style="border-top: 1px dashed #ccc; margin: 8px 0;">
       <p style="margin: 0 0 2px 0;"><strong>Producto:</strong> {{ facturaSeleccionada?.producto }}</p>
       <p style="margin: 0 0 2px 0;"><strong>Tamaño:</strong> {{ facturaSeleccionada?.tamanio }}</p>
       <p style="margin: 0 0 2px 0;"><strong>Cantidad:</strong> {{ facturaSeleccionada?.cantidad }} unidades</p>
-      <p style="margin: 0 0 2px 0;"><strong>Unitario:</strong> ${{ (+facturaSeleccionada?.total / +facturaSeleccionada?.cantidad).toFixed(2) }}</p>
+      <p style="margin: 0 0 2px 0; color: #28a745;"><strong>Promo:</strong> {{ facturaSeleccionada?.promocion }}</p>
       <hr style="border-top: 1px dashed #ccc; margin: 8px 0;">
-      <p style="display: flex; justify-content: space-between; margin: 2px 0;">Subtotal: <span>${{ (+facturaSeleccionada?.total).toFixed(2) }}</span></p>
-      <p style="display: flex; justify-content: space-between; margin: 2px 0;">IVA (19%): <span>${{ (+facturaSeleccionada?.total * 0.19).toFixed(2) }}</span></p>
+      <p style="display: flex; justify-content: space-between; margin: 2px 0;">Subtotal: <span>${{ (+facturaSeleccionada?.subtotal || 0) | number:'1.2-2' }}</span></p>
+      <p style="display: flex; justify-content: space-between; margin: 2px 0; color: #dc3545;">
+        Descuento: <span>-${{ (+facturaSeleccionada?.descuento || 0) | number:'1.2-2' }}</span>
+      </p>
+      <p style="display: flex; justify-content: space-between; margin: 2px 0;">IVA (19%): <span>${{ (+facturaSeleccionada?.iva || 0) | number:'1.2-2' }}</span></p>
       <div class="receipt-total-box" style="background-color: #28a745; color: white; padding: 8px; border-radius: 4px; margin-top: 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 1rem;">
         <span>TOTAL</span>
-        <span>${{ (+facturaSeleccionada?.total * 1.19).toFixed(2) }}</span>
+        <span>${{ (+facturaSeleccionada?.total || 0) | number:'1.2-2' }}</span>
       </div>
     </div>
 
@@ -404,6 +505,22 @@
       <button class="btn btn-primary" (click)="confirmarEliminacion()" [disabled]="cargandoEliminar" style="background-color: #dc3545; border-color: #dc3545;">
         Sí, Eliminar
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Éxito para Quejas y Reclamos -->
+<div class="modal-overlay" *ngIf="mostrarModalQuejaExito" (click)="cerrarModalQuejaExito()">
+  <div class="modal-container" (click)="$event.stopPropagation()" style="max-width: 400px; text-align: center;">
+    <div class="modal-header" style="justify-content: center; border-bottom: none;">
+      <h2 style="color: #28a745;">¡Envío Exitoso!</h2>
+    </div>
+    <div class="modal-body" style="padding: 20px 0;">
+      <p style="font-size: 1.1rem; font-weight: 500; margin-bottom: 10px;">{{ mensajeQueja }}</p>
+      <p style="color: #666;">El tiempo estimado de respuesta a su solicitud es de <strong>{{ diasRespuesta }} días hábiles</strong>.</p>
+    </div>
+    <div class="modal-actions" style="justify-content: center;">
+      <button class="btn btn-primary" (click)="cerrarModalQuejaExito()">Entendido</button>
     </div>
   </div>
 </div>

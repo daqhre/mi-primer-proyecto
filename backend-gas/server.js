@@ -128,11 +128,11 @@ app.post("/registro", (req, res) => {
           const mailOptions = {
             from: process.env.EMAIL_USER || "",
             to: email,
-            subject: "¡Bienvenido a MundiGas!",
+            subject: "¡Bienvenido a Paisa Gas!",
             html: `
               <h2>¡Hola ${nombre}!</h2>
               <p>Tu registro ha sido completado exitosamente.</p>
-              <p>Acabas de registrarte en la página de <strong>MundiGas</strong>.</p>
+              <p>Acabas de registrarte en la página de <strong>Paisa Gas</strong>.</p>
               <p>Detalles de tu cuenta:</p>
               <ul>
                 <li><strong>Nombre:</strong> ${nombre} ${apellido}</li>
@@ -143,7 +143,7 @@ app.post("/registro", (req, res) => {
               <p>Si no realizaste este registro, por favor contacta con nosotros inmediatamente.</p>
               <p>Gracias por confiar en nosotros.</p>
               <br>
-              <p><em>Equipo de MundiGas</em></p>
+              <p><em>Equipo de Paisa Gas</em></p>
             `
           };
 
@@ -233,14 +233,14 @@ app.post("/cambiar-password", (req, res) => {
       const mailOptions = {
         from: process.env.EMAIL_USER || "dairoalbertoqh@gmail.com",
         to: email,
-        subject: "Confirmación de Cambio de Contraseña - MundiGas",
+        subject: "Confirmación de Cambio de Contraseña - Paisa Gas",
         html: `
           <h2>Cambio de Contraseña Exitoso</h2>
           <p>Hola ${usuario.nombre},</p>
           <p>Te confirmamos que tu contraseña ha sido cambiada exitosamente.</p>
           <p>Si no realizaste este cambio, por favor contacta con nuestro equipo de soporte inmediatamente.</p>
           <br>
-          <p><em>Equipo de MundiGas</em></p>
+          <p><em>Equipo de Paisa Gas</em></p>
         `
       };
 
@@ -309,13 +309,13 @@ app.post("/recuperar-password", (req, res) => {
         const mailOptions = {
           from: process.env.EMAIL_USER,
           to: usuario.email,
-          subject: "Confirmación: Cambio de contraseña exitoso - MundiGas",
+          subject: "Confirmación: Cambio de contraseña exitoso - Paisa Gas",
           html: `
             <h2>Contraseña Actualizada</h2>
             <p>Hola ${usuario.nombre},</p>
             <p>Te informamos que tu contraseña ha sido actualizada correctamente.</p>
             <p>Si no realizaste este cambio, contacta a soporte técnico de inmediato.</p>
-            <br><p><em>Equipo de MundiGas</em></p>`
+            <br><p><em>Equipo de Paisa Gas</em></p>`
         };
 
         transporter.sendMail(mailOptions);
@@ -332,14 +332,14 @@ app.post("/recuperar-password", (req, res) => {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: "Tu código de recuperación - MundiGas",
+        subject: "Tu código de recuperación - Paisa Gas",
         html: `
           <h2>Recuperación de Contraseña</h2>
           <p>Hola ${usuario.nombre},</p>
           <p>Tu código de seguridad es:</p>
           <h2 style="color: #007bff;">${codigo}</h2>
           <p>Este código es válido por 15 minutos.</p>
-          <br><p><em>Equipo de MundiGas</em></p>`
+          <br><p><em>Equipo de Paisa Gas</em></p>`
       };
 
       transporter.sendMail(mailOptions, (mailErr) => {
@@ -371,14 +371,14 @@ app.get("/facturas", (req, res) => {
 });
 
 app.post("/comprar", (req, res) => {
-  const { userId, producto, cantidad, tamanio, total } = req.body;
+  const { userId, producto, cantidad, tamanio, subtotal, iva, descuento, total, promocion } = req.body;
 
   if (!userId || !producto || !cantidad || !tamanio || !total) {
     return res.status(400).send("Todos los campos son requeridos.");
   }
 
-  const sql = "INSERT INTO facturas (usuario_id, producto, cantidad, tamanio, total, fecha) VALUES (?, ?, ?, ?, ?, NOW())";
-  db.query(sql, [userId, producto, cantidad, tamanio, total], (err, result) => {
+  const sql = "INSERT INTO facturas (usuario_id, producto, cantidad, tamanio, subtotal, iva, descuento, total, fecha, promocion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
+  db.query(sql, [userId, producto, cantidad, tamanio, subtotal, iva, descuento, total, promocion], (err, result) => {
     if (err) {
       console.log(err);
       return res.status(500).send("Error al guardar la factura.");
@@ -416,27 +416,28 @@ app.post("/quejas", (req, res) => {
       return res.status(500).send("Error al guardar la queja.");
     }
 
-    // 1. Buscamos los datos del usuario que puso la queja
+    // 1. Respondemos inmediatamente al frontend para que el modal aparezca rápido
+    res.send("Queja enviada exitosamente.");
+
+    // 2. Procesamos la notificación por correo en segundo plano
     const userSql = "SELECT id, nombre, apellido, email FROM usuarios WHERE id = ?";
     db.query(userSql, [userId], (userErr, userResult) => {
       if (userErr) {
         console.error("Error SQL al buscar usuario:", userErr);
-        return res.send("Queja guardada, pero hubo un error buscando al usuario.");
+        return;
       }
       
       if (userResult.length === 0) {
         console.error("No se encontró el usuario con ID:", userId);
-        return res.send("Queja guardada, pero no se encontró el remitente.");
+        return;
       }
 
       const usuario = userResult[0];
-      
-      // 2. Configuramos el correo para el administrador
       const mailOptions = {
         from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_USER, // Se envía a tu correo configurado en .env
+        to: process.env.EMAIL_USER,
         subject: `Nueva PQR: ${tipo.toUpperCase()} de ${usuario.nombre} ${usuario.apellido}`,
-        replyTo: usuario.email, // Te permite responder directamente al cliente
+        replyTo: usuario.email,
         html: `
           <div style="font-family: Arial, sans-serif; border: 1px solid #eee; padding: 20px; border-radius: 8px;">
             <h2 style="color: #007bff;">Nueva solicitud de PQR</h2>
@@ -447,18 +448,13 @@ app.post("/quejas", (req, res) => {
             <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; font-style: italic;">
               "${mensaje}"
             </div>
-            <p>Atentamente, <br>Sistema de Notificaciones MundiGas</p>
+            <p>Atentamente, <br>Sistema de Notificaciones Paisa Gas</p>
           </div>`
       };
 
-      // 3. Enviamos el correo y solo entonces respondemos al frontend
       transporter.sendMail(mailOptions, (mailErr, info) => {
-        if (mailErr) {
-          console.error("Error enviando correo PQR:", mailErr);
-          return res.send("Queja enviada exitosamente (notificación por correo no pudo entregarse).");
-        }
-        console.log("Email PQR enviado con éxito:", info.response);
-        res.send("Queja enviada exitosamente y notificada por correo.");
+        if (mailErr) console.error("Error enviando correo PQR:", mailErr);
+        else console.log("Email PQR enviado con éxito:", info.response);
       });
     });
   });
@@ -505,7 +501,7 @@ app.post("/certificados", upload.single('archivo'), (req, res) => {
 // Función para generar PDF
 function fillPDFDocument(doc, data) { 
   // Encabezado
-  doc.fontSize(20).text('Copia de Seguridad - MundiGas', { align: 'center' });
+  doc.fontSize(20).text('Copia de Seguridad - Paisa Gas', { align: 'center' });
   doc.moveDown();
   doc.fontSize(10).text(`Fecha de generación: ${new Date().toLocaleString()}`, { align: 'right' });
   doc.moveDown();
@@ -576,7 +572,7 @@ app.get("/backup-datos/:userId", (req, res) => {
 
           const archive = archiver('zip', { zlib: { level: 9 } });
           res.setHeader('Content-Type', 'application/zip');
-          res.setHeader('Content-Disposition', `attachment; filename=Backup_MundiGas_${data.usuario.nombre}.zip`);
+          res.setHeader('Content-Disposition', `attachment; filename="Backup_Paisa Gas_${data.usuario.nombre}.zip"`);
           archive.pipe(res);
           obtenerPDFBuffer(data).then(pdfBuffer => {
             archive.append(pdfBuffer, { name: 'Resumen_General.pdf' });
@@ -625,7 +621,7 @@ app.post("/backup", (req, res) => {
             const mailOptions = {
               from: process.env.EMAIL_USER,
               to: data.usuario.email,
-              subject: "Tu Copia de Seguridad - MundiGas",
+              subject: "Tu Copia de Seguridad - Paisa Gas",
               html: `<p>Hola ${data.usuario.nombre}, adjunto enviamos tu copia de seguridad completa (ZIP) con facturas y certificados.</p>`,
               attachments: [{ filename: `Copia_Seguridad_${data.usuario.nombre}.zip`, content: zipBuffer }]
             };

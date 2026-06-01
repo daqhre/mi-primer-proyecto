@@ -23,12 +23,17 @@ export class RecuperarPasswordComponent {
   cambioExitoso = false;
   codigoEnviado = false;
   cargando = false;
+  mostrarPasswordNueva = false;
 
   constructor(
     private http: HttpClient, 
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
+
+  toggleMostrarPassword() {
+    this.mostrarPasswordNueva = !this.mostrarPasswordNueva;
+  }
 
   solicitarCodigo() {
     this.mensaje = '';
@@ -40,7 +45,7 @@ export class RecuperarPasswordComponent {
     }
 
     const payload = { email: this.datos.email };
-    this.http.post('http://https://mi-primer-proyecto.onrender.comm/recuperar-password', payload, { responseType: 'text' })
+    this.http.post('http://localhost:3000/recuperar-password', payload, { responseType: 'text' })
       .subscribe({
         next: (response) => {
           this.mensaje = response;
@@ -88,13 +93,14 @@ export class RecuperarPasswordComponent {
       newPassword: this.datos.newPassword
     };
 
-    this.http.post('http://https://mi-primer-proyecto.onrender.comm/recuperar-password', payload, { responseType: 'text' })
+    this.http.post('http://localhost:3000/recuperar-password', payload, { responseType: 'text' })
       .subscribe({
         next: (response) => {
           this.mensaje = response;
           this.cambioExitoso = true;
           this.cargando = false;
-          this.router.navigate(['/login']);
+          // replaceUrl: true evita que el usuario pueda volver a esta pantalla con el botón "atrás"
+          this.router.navigate(['/login'], { replaceUrl: true });
         },
         error: (err) => {
           this.mensaje = `Error: ${err.error || 'Ocurrió un error desconocido.'}`;
