@@ -1,59 +1,86 @@
 # EmpresaGas
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.1.
+Aplicación web desarrollada en Angular para la gestión de servicios de una empresa distribuidora de gas.
 
-## Development server
+## Descripción
 
-To start a local development server, run:
+EmpresaGas es una plataforma web que permite a los usuarios registrarse, iniciar sesión, recuperar contraseñas, consultar información relacionada con los servicios de gas, gestionar perfiles y acceder a diferentes funcionalidades administrativas y de atención al cliente.
+
+## Funcionalidades
+
+* Registro de usuarios.
+* Inicio de sesión.
+* Recuperación y restablecimiento de contraseña.
+* Gestión de perfil de usuario.
+* Consulta de facturas.
+* Gestión de quejas y reclamos.
+* Visualización de promociones.
+* Consulta de certificaciones y normativas.
+* Interfaz responsiva para navegación web.
+
+## Tecnologías utilizadas
+
+* Angular 21
+* TypeScript
+* HTML5
+* CSS3
+* Node.js
+* Express.js
+
+## Requisitos
+
+* Node.js
+* npm
+* Angular CLI
+
+## Instalación
+
+Clonar el repositorio:
+
+```bash
+git clone URL_DEL_REPOSITORIO
+```
+
+Ingresar al proyecto:
+
+```bash
+cd empresa-gas
+```
+
+Instalar dependencias:
+
+```bash
+npm install
+```
+
+Ejecutar la aplicación:
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Abrir en el navegador:
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```text
+http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Estructura del proyecto
 
-```bash
-ng generate --help
+```text
+src/
+├── app/
+│   ├── home/
+│   ├── login/
+│   ├── registro/
+│   ├── reset-password/
+│   └── servicios/
+├── assets/
+└── index.html
 ```
 
-## Building
+## Autor
 
-To build the project run:
+Dairo Quintero
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Proyecto académico desarrollado para la asignatura de Sistemas de informacion.
